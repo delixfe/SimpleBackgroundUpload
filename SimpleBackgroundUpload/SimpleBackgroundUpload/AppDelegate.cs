@@ -67,22 +67,22 @@ namespace SimpleBackgroundUpload
 		public override void DidEnterBackground(UIApplication application){
 			Console.WriteLine("DidEnterBackground called...");
 
-			NSAction timedOutAction = () => {
-				if (backgroundTaskId != 0)
-				{
-					Console.WriteLine($"BackgroundTask {backgroundTaskId} timed out.");
-				}
-			};
+			//NSAction timedOutAction = () => {
+			//	if (backgroundTaskId != 0)
+			//	{
+			//		Console.WriteLine($"BackgroundTask {backgroundTaskId} timed out.");
+			//	}
+			//};
 
-			NSAction finishedAction = () => {
-				Console.WriteLine("Ended background call.");
-				application.InvokeOnMainThread(() => application.EndBackgroundTask(backgroundTaskId));
-			};
+			//NSAction finishedAction = () => {
+			//	Console.WriteLine("Ended background call.");
+			//	application.InvokeOnMainThread(() => application.EndBackgroundTask(backgroundTaskId));
+			//};
 
-			backgroundTaskId = application.BeginBackgroundTask(timedOutAction);
+			//backgroundTaskId = application.BeginBackgroundTask(timedOutAction);
 
-			var task = uploader.PrepareUpload();
-			task.ContinueWith((t) => finishedAction());
+			//var task = uploader.PrepareUpload();
+			//task.ContinueWith((t) => finishedAction());
 		}
 	}
 

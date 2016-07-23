@@ -33,12 +33,13 @@ namespace SimpleBackgroundUpload
 		{
 			// create a new window instance based on the screen size
 			window = new UIWindow (UIScreen.MainScreen.Bounds);
-			
+
 			// If you have defined a root view controller, set it here:
 			// window.RootViewController = myViewController;
 
 			// Enter your webAPI address below
-			webApiAddress = "http://YourWebAPIAddress/SimpleBackgroundUploadWebAPI/File/PostFile";
+			//webApiAddress = "http://YourWebAPIAddress/SimpleBackgroundUploadWebAPI/File/PostFile";
+			webApiAddress = "http://192.168.71.1:8080/File/PostFile";
 
 			window.RootViewController = new UploadController ();
 
@@ -171,11 +172,11 @@ namespace SimpleBackgroundUpload
 			NSUrlSessionUploadTask uploadTask = null;
 
 			if (session != null) {
-				var tasks = await session.GetTasksAsync ();
+				var tasks = await session.GetTasks2Async();
 
 				var taskList = tasks.UploadTasks;
 				if (taskList.Count () > 0)
-					uploadTask = taskList [0];
+					uploadTask = (NSUrlSessionUploadTask) taskList [0];
 			}
 
 			return uploadTask;

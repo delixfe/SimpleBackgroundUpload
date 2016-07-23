@@ -17,7 +17,7 @@ namespace SimpleBackgroundUploadWebAPI.Controllers
             String fileName, filePath;
 
             // TODO: Set your local file path
-            filePath = @"C:\Temp\";
+            filePath = @"/Users/taadefe1/temp/upload/";
 
             // Check if the request contains multipart/form-data.
             if (!Request.Content.IsMimeMultipartContent())

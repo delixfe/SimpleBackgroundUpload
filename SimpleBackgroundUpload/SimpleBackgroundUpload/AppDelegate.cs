@@ -38,7 +38,7 @@ namespace SimpleBackgroundUpload
 
 			// Enter your webAPI address below
 			//webApiAddress = "http://YourWebAPIAddress/SimpleBackgroundUploadWebAPI/File/PostFile";
-			var webApiAddress = "http://192.168.71.1:8080/File/PostFile";
+			var webApiAddress = "http://192.168.71.1:8080/";
 
 			uploader = new Uploader(webApiAddress);
 
@@ -54,7 +54,7 @@ namespace SimpleBackgroundUpload
 			return true;
 		}
 
-		private int backgroundTaskId;
+		//private int backgroundTaskId;
 
 		/// <Docs>Reference to the UIApplication that invoked this delegate method.</Docs>
 		/// <remarks>Application are allocated approximately 5 seconds to complete this method. Application developers should use this

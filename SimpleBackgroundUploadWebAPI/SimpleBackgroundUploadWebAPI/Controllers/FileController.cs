@@ -86,5 +86,24 @@ namespace SimpleBackgroundUploadWebAPI.Controllers
 
             return task;
         }
+
+
+		[HttpPut]
+		public async Task<HttpResponseMessage> PutFile() {
+			string filename = "test.bin";
+			Console.WriteLine($"New put file request {filename}.");
+			var inputStream = await Request.Content.ReadAsStreamAsync();
+			var buffer = new byte[1024 * 1024];
+			int read = 0;
+			long total = 0;
+			do
+			{
+				read = inputStream.Read(buffer, 0, buffer.Length);
+				total += read;
+			} while (read > 0);
+
+			Console.WriteLine($"Received {total} bytes.");
+			return Request.CreateResponse(HttpStatusCode.Created);
+		}
     }
 }

@@ -1,10 +1,10 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using MonoTouch.Foundation;
-using MonoTouch.UIKit;
+using Foundation;
+using UIKit;
 
 namespace SimpleBackgroundUpload
 {
@@ -74,7 +74,7 @@ namespace SimpleBackgroundUpload
 
 				// Creating upload task
 				var uploadTask = session.CreateUploadTask(request, NSUrl.FromFilename(fileToUpload));
-				Console.WriteLine("New TaskID: {0}", uploadTask.TaskIdentifier);
+				Console.WriteLine("New TaskID: {0}", (uint)uploadTask.TaskIdentifier);
 
 				// Start task
 				uploadTask.Resume();
@@ -117,7 +117,7 @@ namespace SimpleBackgroundUpload
 		{
 			try
 			{
-				var message = string.Format("Task ID: {0}, State: {1}, Response: {2}", sessionTask.TaskIdentifier, sessionTask.State, sessionTask.Response);
+				var message = string.Format("Task ID: {0}, State: {1}, Response: {2}", (uint)sessionTask.TaskIdentifier, sessionTask.State, sessionTask.Response);
 				Console.WriteLine(message);
 
 
@@ -128,7 +128,7 @@ namespace SimpleBackgroundUpload
 					notification.AlertAction = $"Task {sessionTask.TaskIdentifier} finished";
 					notification.AlertBody = message;
 					notification.SoundName = UILocalNotification.DefaultSoundName;
-					UIApplication.SharedApplication.PresentLocationNotificationNow(notification);
+					UIApplication.SharedApplication.PresentLocalNotificationNow(notification);
 				});
 
 				// Make sure that we have a response to process
@@ -142,7 +142,7 @@ namespace SimpleBackgroundUpload
 					var resp = (NSHttpUrlResponse)sessionTask.Response;
 
 					// Check that our task completed and server returned StatusCode 201 = CREATED.
-					if (sessionTask.State == NSUrlSessionTaskState.Completed && resp.StatusCode == 201)
+					if (sessionTask.State == NSUrlSessionTaskState.Completed && (int)resp.StatusCode == 201)
 					{
 						// Do something with the uploaded file...
 					}
@@ -182,7 +182,7 @@ namespace SimpleBackgroundUpload
 		// See: https://developer.apple.com/library/ios/documentation/Foundation/Reference/NSURLSessionTaskDelegate_protocol/index.html#//apple_ref/occ/intfm/NSURLSessionTaskDelegate/URLSession:task:didCompleteWithError:
 		public override void DidCompleteWithError(NSUrlSession session, NSUrlSessionTask task, NSError error)
 		{
-			Console.WriteLine(string.Format("DidCompleteWithError TaskId: {0}{1}", task.TaskIdentifier, (error == null ? "" : " Error: " + error.Description)));
+			Console.WriteLine(string.Format("DidCompleteWithError TaskId: {0}{1}", (uint)task.TaskIdentifier, (error == null ? "" : " Error: " + error.Description)));
 
 			if (error == null)
 			{

@@ -4,16 +4,16 @@
 // actions made in the UI designer. If it is removed, they will be lost.
 // Manual changes to this file may not be handled correctly.
 //
-using MonoTouch.Foundation;
+using Foundation;
 using System.CodeDom.Compiler;
 
 namespace SimpleBackgroundUpload
 {
-	[Register ("UploadController")]
+	[Foundation.Register("UploadController")]
 	partial class UploadController
 	{
-		[Outlet]
-		MonoTouch.UIKit.UIButton button1 { get; set; }
+		[Foundation.Outlet]
+		UIKit.UIButton button1 { get; set; }
 		
 		void ReleaseDesignerOutlets ()
 		{

@@ -22,7 +22,7 @@ namespace SimpleBackgroundUpload
 			button1.TouchUpInside += async delegate 
 			{
 				var appDel = UIApplication.SharedApplication.Delegate as AppDelegate;
-				await appDel.PrepareUpload();
+				await appDel.Uploader.PrepareUpload();
 			};
 		}
 	}

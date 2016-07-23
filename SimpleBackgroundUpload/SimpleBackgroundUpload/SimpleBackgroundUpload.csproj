@@ -101,6 +101,7 @@
     <Compile Include="UploadController.designer.cs">
       <DependentUpon>UploadController.cs</DependentUpon>
     </Compile>
+    <Compile Include="Uploader.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\iOS\Xamarin.MonoTouch.CSharp.targets" />
   <ItemGroup>

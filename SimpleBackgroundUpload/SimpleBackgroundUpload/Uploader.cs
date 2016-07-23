@@ -21,44 +21,6 @@ namespace SimpleBackgroundUpload
 		}
 
 
-		/// <Docs>Reference to the UIApplication that invoked this delegate method.</Docs>
-		/// <remarks>Application are allocated approximately 5 seconds to complete this method. Application developers should use this
-		/// time to save user data and tasks, and remove sensitive information from the screen.</remarks>
-		/// <altmember cref="M:MonoTouch.UIKit.UIApplicationDelegate.WillEnterForeground"></altmember>
-		/// <summary>
-		/// Dids the enter background.
-		/// </summary>
-		/// <param name="application">Application.</param>
-		public void DidEnterBackground(UIApplication application)
-		{
-			Console.WriteLine("DidEnterBackground called...");
-
-			// Ask iOS for additional background time and prepare upload.
-			taskId = application.BeginBackgroundTask(delegate
-			{
-				if (taskId != 0)
-				{
-					application.EndBackgroundTask(taskId);
-					taskId = 0;
-				}
-			});
-
-			new System.Action(async delegate
-			{
-
-				await PrepareUpload();
-
-				application.BeginInvokeOnMainThread(delegate
-				{
-					if (taskId != 0)
-					{
-						application.EndBackgroundTask(taskId);
-						taskId = 0;
-					}
-				});
-
-			}).BeginInvoke(null, null);
-		}
 
 		/// <summary>
 		/// Prepares the upload.

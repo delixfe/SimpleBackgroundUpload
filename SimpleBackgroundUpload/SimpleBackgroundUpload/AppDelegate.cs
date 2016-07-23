@@ -54,6 +54,8 @@ namespace SimpleBackgroundUpload
 			return true;
 		}
 
+		private int backgroundTaskId;
+
 		/// <Docs>Reference to the UIApplication that invoked this delegate method.</Docs>
 		/// <remarks>Application are allocated approximately 5 seconds to complete this method. Application developers should use this
 		/// time to save user data and tasks, and remove sensitive information from the screen.</remarks>
@@ -63,7 +65,24 @@ namespace SimpleBackgroundUpload
 		/// </summary>
 		/// <param name="application">Application.</param>
 		public override void DidEnterBackground(UIApplication application){
-			uploader.DidEnterBackground(application);	
+			Console.WriteLine("DidEnterBackground called...");
+
+			NSAction timedOutAction = () => {
+				if (backgroundTaskId != 0)
+				{
+					Console.WriteLine($"BackgroundTask {backgroundTaskId} timed out.");
+				}
+			};
+
+			NSAction finishedAction = () => {
+				Console.WriteLine("Ended background call.");
+				application.InvokeOnMainThread(() => application.EndBackgroundTask(backgroundTaskId));
+			};
+
+			backgroundTaskId = application.BeginBackgroundTask(timedOutAction);
+
+			var task = uploader.PrepareUpload();
+			task.ContinueWith((t) => finishedAction());
 		}
 	}
 

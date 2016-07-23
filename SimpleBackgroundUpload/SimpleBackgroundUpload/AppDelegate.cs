@@ -43,6 +43,10 @@ namespace SimpleBackgroundUpload
 
 			window.RootViewController = new UploadController ();
 
+			var settings = UIUserNotificationSettings.GetSettingsForTypes(
+				  UIUserNotificationType.Alert | UIUserNotificationType.Badge | UIUserNotificationType.Sound, null);
+			UIApplication.SharedApplication.RegisterUserNotificationSettings(settings);
+
 			// make the window visible
 			window.MakeKeyAndVisible ();
 			
@@ -189,7 +193,19 @@ namespace SimpleBackgroundUpload
 		public void ProcessCompletedTask(NSUrlSessionTask sessionTask)
 		{
 			try {
-				Console.WriteLine (string.Format("Task ID: {0}, State: {1}, Response: {2}", sessionTask.TaskIdentifier, sessionTask.State, sessionTask.Response));
+				var message = string.Format("Task ID: {0}, State: {1}, Response: {2}", sessionTask.TaskIdentifier, sessionTask.State, sessionTask.Response);
+				Console.WriteLine (message);
+
+
+
+				UIApplication.SharedApplication.InvokeOnMainThread(() =>
+				{ 
+					UILocalNotification notification = new UILocalNotification();
+					notification.AlertAction = $"Task {sessionTask.TaskIdentifier} finished";
+					notification.AlertBody = message;
+					notification.SoundName = UILocalNotification.DefaultSoundName;
+					UIApplication.SharedApplication.PresentLocationNotificationNow(notification); 
+				});
 
 				// Make sure that we have a response to process
 				if (sessionTask.Response == null || sessionTask.Response.ToString() == "")

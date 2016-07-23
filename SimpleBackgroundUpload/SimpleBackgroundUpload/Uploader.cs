@@ -11,7 +11,6 @@ namespace SimpleBackgroundUpload
 	public class Uploader
 	{
 		NSUrlSession session;
-		int taskId;
 		string webApiAddress;
 
 
@@ -20,9 +19,7 @@ namespace SimpleBackgroundUpload
 			webApiAddress = url;
 		}
 
-		public async Task Upload() {
-			
-		}
+
 
 		/// <summary>
 		/// Prepares the upload.
@@ -56,7 +53,6 @@ namespace SimpleBackgroundUpload
 				// For demo purposes file is attached to project as "Content" and PDF is 8.1MB.
 				var fileToUpload = "UIKitUICatalog.pdf";
 
-				var bodyPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "BodyData.tmp");
 
 				if (!File.Exists(fileToUpload))
 				{
@@ -68,9 +64,7 @@ namespace SimpleBackgroundUpload
 				NSUrl uploadHandleUrl = NSUrl.FromString(webApiAddress + "File/PutFile");
 				NSMutableUrlRequest request = new NSMutableUrlRequest(uploadHandleUrl);
 				request.HttpMethod = "PUT";
-				//request["Content-Type"] = "multipart/form-data; boundary=" + boundary;
 				request["FileName"] = Path.GetFileName(fileToUpload);
-				//WriteMultiPartBodyFile(fileToUpload, bodyPath, boundary);
 
 				// Creating upload task
 				var uploadTask = session.CreateUploadTask(request, NSUrl.FromFilename(fileToUpload));
@@ -171,49 +165,57 @@ namespace SimpleBackgroundUpload
 				config.HttpMaximumConnectionsPerHost = 4; //iOS Default is 4
 				config.TimeoutIntervalForRequest = 600.0; //30min allowance; iOS default is 60 seconds.
 				config.TimeoutIntervalForResource = 120.0; //2min; iOS Default is 7 days
-				return NSUrlSession.FromConfiguration(config, new UploadDelegate(), new NSOperationQueue());
+				return NSUrlSession.FromConfiguration(config, new UploadDelegate(this), new NSOperationQueue());
 			}
 		}
-	}
 
-	public class UploadDelegate : NSUrlSessionTaskDelegate
-	{
-		// Called by iOS when the task finished trasferring data. It's important to note that his is called even when there isn't an error.
-		// See: https://developer.apple.com/library/ios/documentation/Foundation/Reference/NSURLSessionTaskDelegate_protocol/index.html#//apple_ref/occ/intfm/NSURLSessionTaskDelegate/URLSession:task:didCompleteWithError:
-		public override void DidCompleteWithError(NSUrlSession session, NSUrlSessionTask task, NSError error)
+		public class UploadDelegate : NSUrlSessionTaskDelegate
 		{
-			Console.WriteLine(string.Format("DidCompleteWithError TaskId: {0}{1}", task.TaskIdentifier, (error == null ? "" : " Error: " + error.Description)));
+			Uploader uploader;
 
-			if (error == null)
+			public UploadDelegate(Uploader uploader)
 			{
-				var appDel = UIApplication.SharedApplication.Delegate as AppDelegate;
-				appDel.Uploader.ProcessCompletedTask(task);
+				this.uploader = uploader;
+			}
+
+			// Called by iOS when the task finished trasferring data. It's important to note that his is called even when there isn't an error.
+			// See: https://developer.apple.com/library/ios/documentation/Foundation/Reference/NSURLSessionTaskDelegate_protocol/index.html#//apple_ref/occ/intfm/NSURLSessionTaskDelegate/URLSession:task:didCompleteWithError:
+			public override void DidCompleteWithError(NSUrlSession session, NSUrlSessionTask task, NSError error)
+			{
+				Console.WriteLine(string.Format("DidCompleteWithError TaskId: {0}{1}", task.TaskIdentifier, (error == null ? "" : " Error: " + error.Description)));
+
+				if (error == null)
+				{
+					uploader.ProcessCompletedTask(task);
+				}
+			}
+
+			// Called by iOS when session has been invalidated.
+			// See: https://developer.apple.com/library/ios/documentation/Foundation/Reference/NSURLSessionDelegate_protocol/index.html#//apple_ref/occ/intfm/NSURLSessionDelegate/URLSession:didBecomeInvalidWithError:
+			public override void DidBecomeInvalid(NSUrlSession session, NSError error)
+			{
+				Console.WriteLine("DidBecomeInvalid" + (error == null ? "undefined" : error.Description));
+			}
+
+			// Called by iOS when all messages enqueued for a session have been delivered.
+			// See: https://developer.apple.com/library/ios/documentation/Foundation/Reference/NSURLSessionDelegate_protocol/index.html#//apple_ref/occ/intfm/NSURLSessionDelegate/URLSessionDidFinishEventsForBackgroundURLSession:
+			public override void DidFinishEventsForBackgroundSession(NSUrlSession session)
+			{
+				Console.WriteLine("DidFinishEventsForBackgroundSession");
+			}
+
+			// Called by iOS to periodically inform the progress of sending body content to the server.
+			// See: https://developer.apple.com/library/ios/documentation/Foundation/Reference/NSURLSessionTaskDelegate_protocol/index.html#//apple_ref/occ/intfm/NSURLSessionTaskDelegate/URLSession:task:didSendBodyData:totalBytesSent:totalBytesExpectedToSend:
+			public override void DidSendBodyData(NSUrlSession session, NSUrlSessionTask task, long bytesSent, long totalBytesSent, long totalBytesExpectedToSend)
+			{
+
+				// Uncomment line below to see file upload progress outputed to the console. You can track/manage this in your app to monitor the upload progress.
+				Console.WriteLine("DidSendBodyData bSent: {0}, totalBSent: {1} totalExpectedToSend: {2}", bytesSent, totalBytesSent, totalBytesExpectedToSend);
 			}
 		}
-
-		// Called by iOS when session has been invalidated.
-		// See: https://developer.apple.com/library/ios/documentation/Foundation/Reference/NSURLSessionDelegate_protocol/index.html#//apple_ref/occ/intfm/NSURLSessionDelegate/URLSession:didBecomeInvalidWithError:
-		public override void DidBecomeInvalid(NSUrlSession session, NSError error)
-		{
-			Console.WriteLine("DidBecomeInvalid" + (error == null ? "undefined" : error.Description));
-		}
-
-		// Called by iOS when all messages enqueued for a session have been delivered.
-		// See: https://developer.apple.com/library/ios/documentation/Foundation/Reference/NSURLSessionDelegate_protocol/index.html#//apple_ref/occ/intfm/NSURLSessionDelegate/URLSessionDidFinishEventsForBackgroundURLSession:
-		public override void DidFinishEventsForBackgroundSession(NSUrlSession session)
-		{
-			Console.WriteLine("DidFinishEventsForBackgroundSession");
-		}
-
-		// Called by iOS to periodically inform the progress of sending body content to the server.
-		// See: https://developer.apple.com/library/ios/documentation/Foundation/Reference/NSURLSessionTaskDelegate_protocol/index.html#//apple_ref/occ/intfm/NSURLSessionTaskDelegate/URLSession:task:didSendBodyData:totalBytesSent:totalBytesExpectedToSend:
-		public override void DidSendBodyData(NSUrlSession session, NSUrlSessionTask task, long bytesSent, long totalBytesSent, long totalBytesExpectedToSend)
-		{
-			
-			// Uncomment line below to see file upload progress outputed to the console. You can track/manage this in your app to monitor the upload progress.
-			Console.WriteLine ("DidSendBodyData bSent: {0}, totalBSent: {1} totalExpectedToSend: {2}", bytesSent, totalBytesSent, totalBytesExpectedToSend);
-		}
 	}
+
+
 
 }
 
